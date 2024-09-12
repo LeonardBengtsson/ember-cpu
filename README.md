@@ -7,10 +7,11 @@ See examples [here](./ember/examples).
 # Running
 
 Run using `cargo run [args]`.
+
 Examples:
-`cargo run comp ./ember/examples/fibonacci.instr`
-`cargo run run ./ember/examples/fibonacci.cpu`
-`cargo run run ./ember/examples/print_str.instr`
+- `cargo run comp ./ember/examples/fibonacci.instr`
+- `cargo run run ./ember/examples/fibonacci.cpu`
+- `cargo run run ./ember/examples/print_str.instr`
 
 Running a program opens a CLI. Type `help` for a list of commands.
 
