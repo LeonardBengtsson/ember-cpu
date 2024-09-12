@@ -1,0 +1,57 @@
+# [INFO]
+# BUILTIN_LIB
+
+# ALLOC         # (length: int) -> address: &obj | HEAP_ALLOC_ERROR
+# DEALLOC       # ?
+# SETBITS       # ?
+# RESETBITS     # ?
+# DIVIDE        # (num: int, denom: int) -> result: int | DIV_0_ERROR
+# FACTORIAL     # ?
+# IS_PRIME      # ?
+# PRINT_STR     # (str: &obj)
+# CONCAT        # (a: &obj, b: &obj) -> &obj
+# INT_TO_STR    # (n: int) -> &obj
+
+% END
+
+:ALLOC
+.extern mem/alloc
+.return 1
+
+:DEALLOC
+.extern mem/dealloc
+.return
+
+:SETBITS
+.extern mem/setbits
+.return
+
+:RESETBITS
+.extern mem/resetbits
+.return
+
+:DIVIDE
+.extern math/divide
+.return 2
+
+:FACTORIAL
+.extern math/factorial
+.return 1
+
+:IS_PRIME
+.extern math/is_prime
+.return 1
+
+:PRINT_STR
+.extern io/print_str
+.return
+
+:CONCAT
+.extern str/concat
+.return 1
+
+:INT_TO_STR
+.extern str/int_to_str
+.return 1
+
+:END

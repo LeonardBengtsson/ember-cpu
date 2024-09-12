@@ -1,0 +1,7 @@
+.const 0
+inp
+
+:loop
+.const 0
+outp
+% loop

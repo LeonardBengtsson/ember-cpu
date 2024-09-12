@@ -1,0 +1,86 @@
+# [INFO]
+# LANGUAGE_SPECIFICATION
+
+# comments
+# this is a comment
+halt                    # this is an inline comment
+
+# macros
+.extern alloc.instr     # inlines another file
+.push                   # pushes value in 'a' to the stack
+.pop                    # pops the top value in the stack and puts it in 'a'
+.popn                   # pops the top value in the stack
+.pop 3                  # pops the 3 top values in the stack
+.peek                   # copies the top value in the stack to 'a'
+.peek 3                 # copies the value at index 3 in the stack to 'a'
+.rep 3                  # replaces the value at index 3 in the stack with the value in 'c'
+.stackstat              # reads the amount of remaining slots in the stack to 'a'
+
+# jumps
+:J1                     # label
+% J1                    # jump to 'J1'
+%z J1                   # jump to 'J1' if z flag is set
+%n J1                   # jump to 'J1' if n flag is set
+%nz J1                  # jump to 'J1' if n or z flag is set
+%o J1                   # jump to 'J1' if o flag is set
+
+# instructions
+halt                    # halts the program, resetting all registers
+wait                    # does nothing for one cycle
+pause                   # pauses the program
+resume                  # resumes the program
+seterr                  # sets the error register to the value in 'a'
+movab                   # copies the value in register 'a' to register 'b'
+movba                   # ...
+movac                   # ...
+movca                   # ...
+movbc                   # ...
+movcb                   # ...
+const                   # loads the constant specified on the next line to register 'a'
+(0x1234)                # specifies constant 0x1234
+ictr                    # copies the value in the instruction counter register to register 'a'
+sctr                    # copies the value in the stack counter register to register 'a'
+msctr                   # sets the value of the stack counter register to the value in register 'a'
+inp                     # inputs data to 'a' using 'b' as an argument
+outp                    # outputs the data in 'b' using 'a' as an argument
+memr                    # reads the value of the address specified in 'b' and puts it in register 'a'
+memw                    # writes the value of 'b' to the address specified in 'a'
+jmp                     # jumps unconditionally to the address specified in 'a'
+jmpz                    # jumps to the address specified in 'a' if the z flag is set
+jmpn                    # jumps to the address specified in 'a' if the n flag is set
+jmpnz                   # jumps to the address specified in 'a' if the n or z flag is set
+jmpo                    # jumps to the address specified in 'a' if the o flag is set
+noop                    # passes the value of 'a' through the alu, setting or resetting all flags without changing 'a'
+or                      # sets 'a' to (a | b)
+orp                     # passes (a | b)
+and                     # sets 'a' to (a & b)
+andp                    # passes (a & b)
+xor                     # sets 'a' to (a ^ b)
+xorp                    # passes (a ^ b)
+add                     # sets 'a' to (a + b)
+addp                    # passes (a + b)
+sub                     # sets 'a' to (a - b)
+subp                    # passes (a - b)
+mult                    # sets 'a' to (a * b)
+multp                   # passes (a * b)
+rand                    # sets 'a' to a random value between 0x0000 and 0xffff, inclusive
+shl                     # sets 'a' to (a << b)
+shlp                    # passes (a << b)
+shr                     # sets 'a' to (a >> b)
+shrp                    # passes (a >> b)
+shl1                    # sets 'a' to (a << 1)
+#...                    # ...
+shl15                   # ...
+shl1p                   # passes (a << 1)
+#...                    # ...
+shl15p                  # ...
+shr1                    # sets 'a' to (a >> 1)
+#...                    # ...
+shr15                   # ...
+shr1p                   # passes (a >> 1)
+#...                    # ...
+shr15p                  # ...
+set0x0000               # sets 'a' to 0x0000
+set0x0001               # sets 'a' to 0x0001
+set0x000f               # sets 'a' to 0x000f
+set0x0010               # sets 'a' to 0x0010

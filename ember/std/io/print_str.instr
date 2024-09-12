@@ -1,0 +1,23 @@
+# H
+.const 0x0048
+movab
+.const 0x0000
+outp
+
+# i
+.const 0x0069
+movab
+.const 0x0000
+outp
+
+# !
+.const 0x0021
+movab
+.const 0x0000
+outp
+
+# \n
+.const 0x000a
+movab
+.const 0x0000
+outp

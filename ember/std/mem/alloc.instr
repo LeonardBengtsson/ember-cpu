@@ -1,0 +1,151 @@
+# [INFO]
+# BUILTIN_FUNC
+# ALLOC(length: int) -> address: &obj | HEAP_ALLOC_ERROR
+# allocates a space of the specified length on the heap and returns the start address, or a HEAP_ALLOC error if no free
+# space of the specified length is found
+
+# [PSEUDO]
+# fn alloc(length):
+#   startw = 0
+#   startb = 0
+#   streak = 0
+#   for w in HEAP_META..HEAP_DATA
+#     for b in 0..16
+#       if streak >= length
+#         setbits(startw, startb, w, b)
+#         return HEAP_DATA + 16 * w + b
+#       used = (read(w) >> b) & 0x1
+#       if used > 0
+#         streak = 0
+#       else
+#         if streak == 0
+#           startw = w
+#           startb = b
+#         streak++
+#   throw HEAP_ALLOC_ERROR
+
+# [.CPU]
+
+# startw = 0, startb = 0, streak = 0
+set0x0000
+.push
+set0x0000
+.push
+set0x0000
+.push                   # STACK: streak startb startw (_ret) (length)
+
+# LOOP1 head
+.const HEAP_META
+movab
+:LOOP1
+movba                   # w _ _
+.push                   # STACK: w streak startb startw (_ret) (length)
+
+# LOOP2 head
+set0x0000
+movab
+:LOOP2
+movba                   # b _ _
+.push                   # STACK: b w streak startb startw (_ret) (length)
+
+# eval streak >= length
+.peek 2                 # streak _ _
+movac                   # _ _ streak
+.peek 6                 # length _ streak
+movcb                   # length streak _
+sub
+%nz J5                  # length - streak <= 0 (streak >= length)
+
+# used = (read(w) >> b) & 0x1
+.peek                   # b _ _
+movac                   # _ _ b
+.peek 1                 # w _ b
+movab                   # _ w b
+memr                    # read(w) _ b
+movcb                   # read(w) b _
+shr                     # (read(w) >> b) _ _
+movab                   # _ (read(w) >> b) _
+set0x0001               # 0x0001 (read(w) >> b) _
+and                     # used _ _
+%z J1                   # used == 0
+
+# used > 0
+# streak = 0
+set0x0000               # 0x0000
+movac                   # _ _ 0x0000
+.rep 2                  # streak = 0x0000
+% J4
+
+# used == 0
+# eval streak == 0
+:J1
+.peek 2                 # streak _ _
+%z J2                   # streak == 0
+% J3
+
+# streak == 0
+:J2
+.peek                   # b _ _
+movac                   # _ _ b
+.rep 3                  # startb = b
+.peek 1                 # w _ _
+movac                   # _ _ w
+.rep 4                  # startw = w
+
+# streak++
+:J3
+.peek 2                 # streak _ _
+inc                     # streak+1 _ _
+movac                   # _ _ streak+1
+.rep 2                  # streak = streak+1
+
+# LOOP2 end
+:J4
+.pop                    # b _ _, STACK: w streak startb startw (_ret) (length)
+inc                     # b+1
+movac                   # b+1 _ b+1
+movab                   # _ b+1 b+1
+set0x0010               # 0x0010 b+1 b+1
+sub
+%nz J6                  # 16 <= b+1
+% LOOP2
+
+# setbits, return
+# STACK: b w streak startb startw (_ret) (length)
+:J5
+
+# setbits(startw, startb, w, b)
+.extern setbits_alt     # ARGS: (endb = b, endw = w, _ = streak, startb = startb, startw = startw)
+
+# return HEAP_DATA + 16 * w + b
+.pop                    # b _ _
+movac                   # _ _ b
+.pop                    # w _ b
+shl4                    # (w * 16) _ b
+movab                   # _ (w * 16) b
+.const HEAP_DATA        # HEAP_DATA (w * 16) b
+add                     # (HEAP_DATA + w * 16) _ b
+movcb                   # (HEAP_DATA + w * 16) b _
+add
+movac
+.pop 3
+movca
+% END                   # STACK: ret_val (_ret) (length)
+
+# LOOP1 end
+:J6
+.pop                    # STACK: streak startb startw (_ret) (length)
+inc
+movab                   # _ w+1 _
+.const HEAP_DATA
+sub
+%nz J7                  # HEAP_DATA <= w+1
+% LOOP1
+
+# throw
+:J7
+.pop 3
+.err HEAP_ALLOC_ERROR
+.push                   # STACK: HEAP_ALLOC_ERROR (_ret) (length)
+
+:END

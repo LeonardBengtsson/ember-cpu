@@ -1,0 +1,124 @@
+# [INFO]
+# BUILTIN_FUNC
+# SETBITS(startw: usize, startb: usize, endw: usize, endb: usize)
+# sets a sequence of bits to true, from bit [startb] in word [startw] to bit [endb] in word [endw], exclusive
+
+# [EXAMPLE]
+# startw = 1, startb = 4, endw = 2, endb = 3
+#                           ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+# IN:  0000100011101101 1001110100011001 1000000011111010
+#                           ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+# OUT: 0000100011101101 1001111111111111 1111000011111010
+
+# [PSEUDO]
+# fn setbits(startw, startb, endw, endb)
+#   for w in startw..=endw)
+#     t = read(w)
+#     for b in 0..16
+#       if w == startw && b < startb
+#         break
+#       if w == endw && b >= endb
+#         break
+#       t = t | (0x1 << b)
+#     write(w, t)
+
+# [.CPU]
+
+# start                 # STACK: startw startb endw endb
+
+# LOOP1 head
+.peek                   # startw _ _
+:LOOP1
+.push                   # _ w _, STACK: w ...
+
+# t = read(w)
+memr                    # t w _
+.push                   # STACK: t w ...
+
+# LOOP2 head
+set0x0000               # b _ _
+:LOOP2
+.push                   # STACK: b t w ...
+
+# eval w == startw
+.peek 2                 # w _ _
+movac                   # _ _ w
+.peek 3                 # startw _ w
+movcb                   # startw w w
+sub
+%z J1                   # startw - w == 0 (w == startw)
+
+# eval w == endw
+:J2
+.peek 5                 # endw _ w
+movcb                   # endw w _
+sub
+%z J3                   # endw - w == 0 (w == endw)
+% J4
+
+# w == startw
+# eval b < startb
+:J1
+.peek 4                 # startb _ _
+movac                  # _ _ startb
+.peek                   # b _ startb
+movcb                   # b startb _
+sub
+%n J5                   # b - startb < 0 (b < startb)
+.peek 1                 # w _ _
+movac                   # _ _ w
+% J2
+
+# w == endw
+# eval b >= endb
+:J3
+.peek 6                 # endb _ _
+movac                   # _ _ endb
+.peek                   # b _ endb
+movcb                   # b endb _
+sub
+%nz J5                  # b - endb <= 0 (b <= endb)
+
+# t = t | (0x1 << b)
+:J4
+.peek                   # b _ _
+movab                   # _ b _
+set0x0001               # 0x0001 b _
+shl                     # (0x1 << b) _ _
+movac                   # _ _ (0x1 << b)
+.peek 1                 # t _ (0x1 << b)
+movcb                   # t (0x1 << b) _
+or                      # t_new _ _
+.rep 1
+
+# LOOP2 end
+.pop                    # b _ _
+movab                   # b b _
+movac                   # _ b b
+set0x000e               # 0x000e b b
+sub
+%n J5                   # 14 - b < 0 (14 < b, b+1 >= 16)
+movba                   # b _ _
+inc                     # b+1 _ _
+% LOOP2
+
+# LOOP1 end
+:J5
+.popn                   # STACK: t w ...
+.pop                    # t _ _
+movac                   # _ _ t
+.pop                    # w _ t
+movcb                   # w t _
+memw                    # write(w, t)
+movac                   # _ _ w
+.peek 2                 # endw _ w
+movcb                   # endw w w
+sub
+%n J6                   # endw - w < 0 (endw < w, endw <= w+1)
+movca                   # w _ _
+inc                     # w+1 _ _
+% LOOP1
+
+# END
+:J6
+.pop 4                  # STACK: <restored>

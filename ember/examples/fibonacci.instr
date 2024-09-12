@@ -1,0 +1,13 @@
+# value stored in c register
+
+.const 1
+movab
+
+:loop
+
+movba
+movcb
+add
+movac
+
+% loop
