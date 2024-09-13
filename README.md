@@ -1,4 +1,4 @@
-Emulates my (slightly esoteric) [Ember CPU architecture](./ember/architecture.md).
+Emulates my [Ember CPU architecture](./ember/architecture.md).
 Note that this project is in a very early state and mostly just doesn't work.
 
 Programs are written in `.instr` files. See the (outdated) language specification [here](./ember/language_specification.instr).
